@@ -61,8 +61,6 @@ $(document).ready(function() {
     $("#train-time-input").val("")
     $("#train-frequency-input").val("")
 
-    return false;
-
     });
 });
 
