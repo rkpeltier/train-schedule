@@ -12,6 +12,8 @@ var config = {
   //Database
   var database = firebase.database();
 
+$(document).ready(function() {
+
   //Add values to db
   $("#add-train").on("click", function(event) {
     event.preventDefault();
@@ -28,30 +30,42 @@ var config = {
         freqency: frequency
     });
 
-    //Adding to the table
-  database.ref().on("child_added", function(db){
-    //DB Object variable
-      var dbObj = db.val();
-  //Converting to momentjs object
-      var trainTime = moment(dbObj.time,"HH:mm").subtract(1, "years");
-      var trainFreq = moment(dbObj.freqency, "mm");
-      var diffTime = moment().diff(trainTime, "minutes");
-    //The Math
-      var remainingTime = diffTime % trainFreq;
-      var minAway = remainingTime - trainFreq;
+//Adding to the table
+  database.ref().on("child_added", function(childSnapshot){
+//DB Object variable
+    var dbObj = childSnapshot.val();
+
+//Converting to momentjs object
+    var trainTime = moment(dbObj.time,"HH:mm").subtract(1, "years");
+    var diffTime = moment().diff(trainTime, "minutes");
+
+//The Math
+    var remainingTime = diffTime % frequency;
+    var minAway = frequency - remainingTime;
+    var nextTrain = moment().add(minAway, "minutes");
+    var trainTrain = moment(nextTrain).format("mm");
     
+//Adding new rows
+    var newRow = $("<tr>")
+    newRow.append($('<td>' + dbObj.name + '</td>'));
+    newRow.append($('<td>' + dbObj.destination + '</td>'));
+    newRow.append($('<td>' + dbObj.freqency + '</td>'));
+    newRow.append($('<td>' + dbObj.time + '</td>'));
+    newRow.append($('<td>' + trainTrain + '</td>'));
 
+    $('tbody').append(newRow);
 
+//Clear user input
+    $("#train-name-input").val("")
+    $("#destination-input").val("")
+    $("#train-time-input").val("")
+    $("#train-frequency-input").val("")
 
-      var newRow = $("<tr>")
-      newRow.append($('<td>' + dbObj.name + '</td>'));
-      newRow.append($('<td>' + dbObj.destination + '</td>'));
-      newRow.append($('<td>' + dbObj.freqency + '</td>'));
-      newRow.append($('<td>' + dbObj.time + '</td>'));
-      newRow.append($('<td>' + minAway + '</td>'));
+    return false;
 
-      $('tbody').append(newRow);
+    });
+});
 
-  });
-    
-  });
+});
+//  The math is wrong?? Less wrong?
+//Couldn't figure out how to get the data to display if it already existed on the server
